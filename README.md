@@ -1,5 +1,26 @@
 # [SoX][] cheat sheet
 
+## Definition of *dBFS*
+
+The definition of the *dBFS* unit of measurement is [notably ambiguous][dbFS],
+especially when dealing with RMS quantities.
+
+[AES17-2015][] 3.12.1 and [IEC 61606-3:2008][] 3.4 both define 0 dBFS as the RMS
+amplitude of a full-scale sine wave.
+
+The SoX `stats` filter uses a different definition, where the maximum sample
+value is defined as 0 dB, and the RMS value is derived from that. Thus, a
+full-scale sine wave has an RMS amplitude of -3 dB according to SoX:
+
+```
+$ sox --null --null synth 5 sine 997 stats
+Pk lev dB      -0.00
+RMS lev dB     -3.01
+```
+
+Thus, to get to the dBFS value, one must add 3.01 dB to the RMS level that SoX
+reports.
+
 ## Generate REW-compatible WAV files
 
 Use the `--type wavpcm` output option.
