@@ -27,5 +27,14 @@ sox ... --rate 48000 ... \
 
 ![BS.468 filter response](bs468.png)
 
+When using such a filter for [AES17-2015][]/[IEC 61606-3:2008][] measurements,
+don't forget to add 5.6 dB of attenuation as specified in these standards:
+
+```
+gain -5.6
+```
+
+[AES17-2015]: http://www.aes.org/publications/standards/search.cfm?docID=21
+[IEC 61606-3:2008]: https://webstore.iec.ch/publication/5666
 [ITU-R BS.468-4]: https://www.itu.int/rec/R-REC-BS.468-4-198607-I
 [SoX]: http://sox.sourceforge.net/
