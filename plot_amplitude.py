@@ -28,6 +28,7 @@ def compute_rms_db(samples):
 	samples = samples.astype(float)
 	samples_squared = np.square(samples)
 	samples_mean_squared = np.fmax(convolve(samples_squared, np.ones(window_size_samples) / window_size_samples, mode='valid'), 1e-20)
+	samples_mean_squared = samples_mean_squared[::window_size_samples]
 	samples_rms = np.sqrt(samples_mean_squared)
 	samples_rms_db = 20 * np.log10(samples_rms)
 	if args.center:
@@ -42,7 +43,7 @@ axes.autoscale(axis='x', tight=True)
 axes.grid()
 
 axes.set_xlabel('Time (seconds)')
-xaxis = np.arange(window_size_samples, samples.size + 1) / sample_rate_hz
+xaxis = np.arange(window_size_samples, samples.size + 1, window_size_samples) / sample_rate_hz
 
 if args.reference_wav_file is not None:
 	reference_sample_rate_hz, reference_samples = wavfile.read(args.reference_wav_file)
