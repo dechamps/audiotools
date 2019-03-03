@@ -36,11 +36,6 @@ def compute_rms_db(samples):
 	return samples_rms_db
 samples_rms_db = compute_rms_db(samples)
 
-def post_process_yaxis(values):
-	if not args.center:
-		return values
-	return values - np.median(values)
-
 figure = plt.figure()
 axes = figure.add_subplot(1, 1, 1)
 axes.set_ylabel('RMS amplitude (dB)')
@@ -49,6 +44,14 @@ axes.grid()
 
 axes.set_xlabel('Time (seconds)')
 xaxis = np.arange(window_size_samples, samples.size + 1, window_size_samples) / sample_rate_hz
+
+def plot(x, y, **kwargs):
+	if args.center:
+		y -= np.median(y)
+	if args.against_amplitude or args.against_normalized_amplitude:
+		axes.scatter(x, y, **kwargs)
+	else:
+		axes.plot(x, y, **kwargs)
 
 if args.reference_wav_file is not None:
 	reference_sample_rate_hz, reference_samples = wavfile.read(args.reference_wav_file)
@@ -67,12 +70,12 @@ if args.reference_wav_file is not None:
 		axes.set_xlabel('Normalized reference amplitude (dB)')
 	if args.relative:
 		axes.set_ylabel('RMS amplitude error (dB)')
-		axes.plot(xaxis, post_process_yaxis(samples_rms_db - reference_sample_rms_db))
+		plot(xaxis, samples_rms_db - reference_sample_rms_db)
 	else:
-		axes.plot(xaxis, post_process_yaxis(reference_sample_rms_db), label='Reference')
-		axes.plot(xaxis, post_process_yaxis(samples_rms_db), label='Signal')
+		plot(xaxis, reference_sample_rms_db, label='Reference')
+		plot(xaxis, samples_rms_db, label='Signal')
 		axes.legend()
 else:
-	axes.plot(xaxis, post_process_yaxis(samples_rms_db))
+	plot(xaxis, samples_rms_db)
 
 plt.show()
