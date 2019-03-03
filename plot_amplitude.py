@@ -11,6 +11,7 @@ argument_parser = argparse.ArgumentParser(description='Plots the RMS amplitude o
 argument_parser.add_argument('--wav-file', help='path to the input WAV file', required=True)
 argument_parser.add_argument('--reference-wav-file', help='use a WAV file as a reference signal')
 argument_parser.add_argument('--relative', help='plot the error between the signal and the reference (if any)', action='store_true')
+argument_parser.add_argument('--center', help='offset the signal amplitude values such that that the median is 0 dB', action='store_true')
 argument_parser.add_argument('--window-size-seconds', help='size of sliding window, in seconds', type=float, default=0.01)
 args = argument_parser.parse_args()
 
@@ -28,6 +29,8 @@ def compute_rms_db(samples):
 	samples_mean_squared = np.fmax(convolve(samples_squared, np.ones(window_size_samples) / window_size_samples, mode='valid'), 1e-20)
 	samples_rms = np.sqrt(samples_mean_squared)
 	samples_rms_db = 20 * np.log10(samples_rms)
+	if args.center:
+		samples_rms_db -= np.median(samples_rms_db)
 	return samples_rms_db
 samples_rms_db = compute_rms_db(samples)
 
