@@ -11,6 +11,7 @@ argument_parser = argparse.ArgumentParser(description='Plots the RMS amplitude o
 argument_parser.add_argument('--wav-file', help='path to the input WAV file', required=True)
 argument_parser.add_argument('--reference-wav-file', help='use a WAV file as a reference signal')
 argument_parser.add_argument('--relative', help='plot the error between the signal and the reference (if any)', action='store_true')
+argument_parser.add_argument('--against-amplitude', help='plot against reference amplitude (if any), not time', action='store_true')
 argument_parser.add_argument('--center', help='offset the signal amplitude values such that that the median is 0 dB', action='store_true')
 argument_parser.add_argument('--window-size-seconds', help='size of sliding window, in seconds', type=float, default=0.01)
 args = argument_parser.parse_args()
@@ -36,7 +37,13 @@ samples_rms_db = compute_rms_db(samples)
 
 figure = plt.figure()
 axes = figure.add_subplot(1, 1, 1)
-time_seconds = np.arange(window_size_samples, samples.size + 1) / sample_rate_hz
+axes.set_ylabel('RMS amplitude (dB)')
+axes.autoscale(axis='x', tight=True)
+axes.grid()
+
+axes.set_xlabel('Time (seconds)')
+xaxis = np.arange(window_size_samples, samples.size + 1) / sample_rate_hz
+
 if args.reference_wav_file is not None:
 	reference_sample_rate_hz, reference_samples = wavfile.read(args.reference_wav_file)
 	if reference_samples.ndim != 1:
@@ -46,17 +53,16 @@ if args.reference_wav_file is not None:
 	if reference_samples.size != samples.size:
 		raise RuntimeError('input file and reference file must be the same length')
 	reference_sample_rms_db = compute_rms_db(reference_samples)
+	if args.against_amplitude:
+		xaxis = reference_sample_rms_db
+		axes.set_xlabel('Reference amplitude (dB)')
 	if args.relative:
-		axes.plot(time_seconds, samples_rms_db - reference_sample_rms_db, label='Error')
+		axes.plot(xaxis, samples_rms_db - reference_sample_rms_db, label='Error')
 	else:
-		axes.plot(time_seconds, reference_sample_rms_db, label='Reference')
-		axes.plot(time_seconds, samples_rms_db, label='Signal')
+		axes.plot(xaxis, reference_sample_rms_db, label='Reference')
+		axes.plot(xaxis, samples_rms_db, label='Signal')
 	axes.legend()
 else:
-	axes.plot(time_seconds, samples_rms_db)
+	axes.plot(xaxis, samples_rms_db)
 
-axes.set_xlabel('Time (seconds)')
-axes.set_ylabel('RMS amplitude (dB)')
-axes.autoscale(axis='x', tight=True)
-axes.grid()
 plt.show()
