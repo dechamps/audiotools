@@ -66,11 +66,12 @@ if args.reference_wav_file is not None:
 		xaxis = reference_sample_rms_db - np.max(reference_sample_rms_db)
 		axes.set_xlabel('Normalized reference amplitude (dB)')
 	if args.relative:
-		axes.plot(xaxis, post_process_yaxis(samples_rms_db - reference_sample_rms_db), label='Error')
+		axes.set_ylabel('RMS amplitude error (dB)')
+		axes.plot(xaxis, post_process_yaxis(samples_rms_db - reference_sample_rms_db))
 	else:
 		axes.plot(xaxis, post_process_yaxis(reference_sample_rms_db), label='Reference')
 		axes.plot(xaxis, post_process_yaxis(samples_rms_db), label='Signal')
-	axes.legend()
+		axes.legend()
 else:
 	axes.plot(xaxis, post_process_yaxis(samples_rms_db))
 
