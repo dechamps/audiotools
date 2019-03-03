@@ -12,7 +12,7 @@ argument_parser.add_argument('--wav-file', help='path to the input WAV file', re
 argument_parser.add_argument('--reference-wav-file', help='use a WAV file as a reference signal')
 argument_parser.add_argument('--relative', help='plot the error between the signal and the reference (if any)', action='store_true')
 argument_parser.add_argument('--against-amplitude', help='plot against reference amplitude (if any), not time', action='store_true')
-argument_parser.add_argument('--center', help='offset the signal amplitude values such that that the median is 0 dB', action='store_true')
+argument_parser.add_argument('--center', help='offset the Y axis such that that the median is 0 dB', action='store_true')
 argument_parser.add_argument('--window-size-seconds', help='size of sliding window, in seconds', type=float, default=0.01)
 args = argument_parser.parse_args()
 
@@ -31,10 +31,13 @@ def compute_rms_db(samples):
 	samples_mean_squared = samples_mean_squared[::window_size_samples]
 	samples_rms = np.sqrt(samples_mean_squared)
 	samples_rms_db = 20 * np.log10(samples_rms)
-	if args.center:
-		samples_rms_db -= np.median(samples_rms_db)
 	return samples_rms_db
 samples_rms_db = compute_rms_db(samples)
+
+def post_process_yaxis(values):
+	if not args.center:
+		return values
+	return values - np.median(values)
 
 figure = plt.figure()
 axes = figure.add_subplot(1, 1, 1)
@@ -58,12 +61,12 @@ if args.reference_wav_file is not None:
 		xaxis = reference_sample_rms_db
 		axes.set_xlabel('Reference amplitude (dB)')
 	if args.relative:
-		axes.plot(xaxis, samples_rms_db - reference_sample_rms_db, label='Error')
+		axes.plot(xaxis, post_process_yaxis(samples_rms_db - reference_sample_rms_db), label='Error')
 	else:
-		axes.plot(xaxis, reference_sample_rms_db, label='Reference')
-		axes.plot(xaxis, samples_rms_db, label='Signal')
+		axes.plot(xaxis, post_process_yaxis(reference_sample_rms_db), label='Reference')
+		axes.plot(xaxis, post_process_yaxis(samples_rms_db), label='Signal')
 	axes.legend()
 else:
-	axes.plot(xaxis, samples_rms_db)
+	axes.plot(xaxis, post_process_yaxis(samples_rms_db))
 
 plt.show()
