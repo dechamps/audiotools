@@ -10,6 +10,7 @@ from scipy.signal import convolve
 argument_parser = argparse.ArgumentParser(description='Plots the RMS amplitude of a signal over time.')
 argument_parser.add_argument('--wav-file', help='path to the input WAV file', required=True)
 argument_parser.add_argument('--reference-wav-file', help='use a WAV file as a reference signal')
+argument_parser.add_argument('--relative', help='plot the error between the signal and the reference (if any)', action='store_true')
 argument_parser.add_argument('--window-size-seconds', help='size of sliding window, in seconds', type=float, default=0.01)
 args = argument_parser.parse_args()
 
@@ -42,12 +43,17 @@ if args.reference_wav_file is not None:
 	if reference_samples.size != samples.size:
 		raise RuntimeError('input file and reference file must be the same length')
 	reference_sample_rms_db = compute_rms_db(reference_samples)
-	axes.plot(time_seconds, reference_sample_rms_db, label='Reference')
-axes.plot(time_seconds, samples_rms_db, label='Signal')
+	if args.relative:
+		axes.plot(time_seconds, samples_rms_db - reference_sample_rms_db, label='Error')
+	else:
+		axes.plot(time_seconds, reference_sample_rms_db, label='Reference')
+		axes.plot(time_seconds, samples_rms_db, label='Signal')
+	axes.legend()
+else:
+	axes.plot(time_seconds, samples_rms_db)
 
 axes.set_xlabel('Time (seconds)')
 axes.set_ylabel('RMS amplitude (dB)')
 axes.autoscale(axis='x', tight=True)
 axes.grid()
-axes.legend()
 plt.show()
