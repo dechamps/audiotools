@@ -25,7 +25,7 @@ window_size_samples = int(sample_rate_hz * args.window_size_seconds)
 def compute_rms_db(samples):
 	samples = samples.astype(float)
 	samples_squared = np.square(samples)
-	samples_mean_squared = convolve(samples_squared, np.ones(window_size_samples) / window_size_samples, mode='valid')
+	samples_mean_squared = np.fmax(convolve(samples_squared, np.ones(window_size_samples) / window_size_samples, mode='valid'), 1e-20)
 	samples_rms = np.sqrt(samples_mean_squared)
 	samples_rms_db = 20 * np.log10(samples_rms)
 	return samples_rms_db
