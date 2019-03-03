@@ -120,6 +120,68 @@ this measurement will reflect the improved perceived dynamic range thanks to the
 weighting filter. For example, the measured value with SoX `dither -s -p 16` is
 101 dB CCIR-RMS.
 
+## Linearity measurement
+
+This procedure measures the amplitude linearity of the EUT; i.e. its low-level
+signal accuracy. It is especially effective at catching broken digital audio
+chains, especially dithering issues and poorly designed DACs.
+
+This measurement can be seen as complementary to dynamic range measurements:
+while dynamic range measurements throw out the test signal and focuses on the
+noise, this linearity measurement does the exact opposite and throws out the
+noise to focus on the test signal.
+
+### Test signal
+
+```
+sox --null --bits 16 --rate 48000 997-fadeout-48000-16.wav synth 100 sine 997 synth exp amod 0.01 0 0 0 55
+```
+
+### Recorded signal analysis
+
+```
+sox ... --encoding floating-point --bits 64 --norm fadeout-filtered.wav sinc -t 20 994-1003 remix 1
+./plot_amplitude.py --wav-file fadeout-filtered.wav
+```
+
+### Example results
+
+Ideal result obtained by analysing the test signal itself. Notice how the
+analyser can resolve down to around -110 dBFS despite the presence of 16-bit
+dithering noise:
+
+![16-bit](16bit.png)
+
+Example abnormal result when a 16-bit signal is truncated instead of dithered.
+Notice the apparent 16-bit quantization steps between -80 and -100 dBFS, and the
+sudden drop near -96 dBFS as the test signal drops below the least significant
+bit:
+
+![16-bit undithered](16bit-undithered.png)
+
+### Adjusting the test parameters
+
+- The test signal length determines time resolution. When changing the test
+  signal duration, make sure to change the exponential amplitude modulation
+  length by the inverse factor. For example, for a quicker 20-second test,
+  change `100` to `20` and `0.01` to `0.05`.
+- Use the `plot_amplitude --window-size-seconds` parameter to adjust the
+  smoothing of the resulting plot. Higher values make for a more readable plot
+  but hides uncertainty in the data points.
+- The amplitude lower bound of the test signal is -110 dBFS in the command
+  above. It is twice the parameter `55`. For example, to test down to -140 dBFS,
+  change `55` to `70`.
+- The purpose of the analysis band-pass filter is to fish the test signal out
+  of the dithering noise, as well as any additional noise produced by the EUT.
+  The filter parameters determine the lower amplitude bound at which the
+  analyser itself "bottoms out" (i.e. becomes unable to distinguish the test
+  signal from the surrounding noise). That limit appears as an horizontal
+  "floor" (asymptote) in the resulting plot. The above command is able to
+  resolve down to around 15 dB below a TPDF dither noise floor; so, for example,
+  it can measure down to around -110 dBFS (~18 bits) in the presence of 16-bit
+  dithering noise. The absolute limit of the analyser is around -150 dBFS,
+  presumably due to floating-point precision errors in the sinc filter.
+
 [AES17-2015]: http://www.aes.org/publications/standards/search.cfm?docID=21
 [dbFS]: https://en.wikipedia.org/wiki/DBFS#RMS_levels
 [dither]: https://en.wikipedia.org/wiki/Dither
