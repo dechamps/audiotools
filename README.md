@@ -198,8 +198,8 @@ sox linearity-test.wav --no-dither linearity-recorded.wav gain -10
   of the dithering noise, as well as any additional noise produced by the EUT.
   The filter parameters determine the lower amplitude bound at which the
   analyser itself "bottoms out" (i.e. becomes unable to distinguish the test
-  signal from the surrounding noise). That limit appears as an horizontal
-  "floor" (asymptote) in the resulting plot. The above command is able to
+  signal from the surrounding noise). That limit appears as a vertical
+  "hockey stick" on the left of the resulting plot. The above command is able to
   resolve down to around 15 dB below a TPDF dither noise floor; so, for example,
   it can measure down to around -110 dBFS (~18 bits) in the presence of 16-bit
   dithering noise. The absolute limit of the analyser is around -150 dBFS,
