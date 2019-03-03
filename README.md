@@ -134,30 +134,53 @@ noise to focus on the test signal.
 ### Test signal
 
 ```
-sox --null --bits 16 --rate 48000 997-fadeout-48000-16.wav synth 100 sine 997 synth exp amod 0.01 0 0 0 55
+sox --null --bits 16 --rate 48000 linearity-test.wav \
+    synth 100 sine 997 \
+    synth exp amod 0.01 0 0 0 65
 ```
 
 ### Recorded signal analysis
 
 ```
-sox ... --encoding floating-point --bits 64 --norm fadeout-filtered.wav sinc -t 20 994-1003 remix 1
-./plot_amplitude.py --wav-file fadeout-filtered.wav
+sox linearity-test.wav --bits 32 linearity-reference.wav sinc -t 20 994-1003 remix 1
+sox linearity-recorded.wav --bits 32 linearity-filtered.wav sinc -t 20 994-1003 remix 1
+./correlate.py \
+    --reference-wav-file=linearity-reference.wav \
+    --test-wav-file=linearity-filtered.wav \
+    --aligned-wav-file=linearity-aligned.wav
+./plot_amplitude.py \
+    --reference-wav-file=linearity-reference.wav \
+    --wav-file=linearity-aligned.wav \
+    --against-normalized-amplitude --relative --center --window-size-seconds=1
 ```
 
 ### Example results
 
-Ideal result obtained by analysing the test signal itself. Notice how the
-analyser can resolve down to around -110 dBFS despite the presence of 16-bit
-dithering noise:
+Ideal result where `linearity-recorded.wav` is a copy of `linearity-test.wav`:
 
-![16-bit](16bit.png)
+```
+sox linearity-test.wav linearity-recorded.wav
+```
+![Ideal linearity](linearity-ideal.png)
 
-Example abnormal result when a 16-bit signal is truncated instead of dithered.
-Notice the apparent 16-bit quantization steps between -80 and -100 dBFS, and the
-sudden drop near -96 dBFS as the test signal drops below the least significant
-bit:
+Normal result where `linearity-recorded.wav` is a redithered copy of
+`linearity-test.wav`. 
 
-![16-bit undithered](16bit-undithered.png)
+```
+sox linearity-test.wav linearity-recorded.wav gain -1
+```
+![Redithered linearity](linearity-redithered.png)
+
+Notice how the analyser can still resolve down to around -110 dBFS despite the
+presence of additional 16-bit dithering noise.
+
+Abnormal result where `linearity-recorded.wav` is a copy of `linearity-test.wav`
+that went through a gain filter without being redithered afterwards:
+
+```
+sox linearity-test.wav --no-dither linearity-recorded.wav gain -10
+```
+![No dither linearity](linearity-nodither.png)
 
 ### Adjusting the test parameters
 
@@ -168,9 +191,9 @@ bit:
 - Use the `plot_amplitude --window-size-seconds` parameter to adjust the
   smoothing of the resulting plot. Higher values make for a more readable plot
   but hides uncertainty in the data points.
-- The amplitude lower bound of the test signal is -110 dBFS in the command
-  above. It is twice the parameter `55`. For example, to test down to -140 dBFS,
-  change `55` to `70`.
+- The amplitude lower bound of the test signal is -130 dBFS in the command
+  above. It is twice the parameter `65`. For example, to test down to -150 dBFS,
+  change `65` to `75`.
 - The purpose of the analysis band-pass filter is to fish the test signal out
   of the dithering noise, as well as any additional noise produced by the EUT.
   The filter parameters determine the lower amplitude bound at which the
