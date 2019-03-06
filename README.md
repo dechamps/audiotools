@@ -136,14 +136,14 @@ noise to focus on the test signal.
 ```
 sox --null --bits 16 --rate 48000 linearity-test.wav \
     synth 100 sine 997 \
-    synth exp amod 0.01 0 0 0 65
+    synth exp amod 0.01 0 0 0 60
 ```
 
 ### Recorded signal analysis
 
 ```
-sox linearity-test.wav --bits 32 linearity-reference.wav sinc -t 20 994-1003 remix 1
-sox linearity-recorded.wav --bits 32 linearity-filtered.wav sinc -t 20 994-1003 remix 1
+sox linearity-test.wav --bits 32 linearity-reference.wav bandpass 997 200q bandpass 997 200q remix 1
+sox linearity-recorded.wav --bits 32 linearity-filtered.wav bandpass 997 200q bandpass 997 200q remix 1
 ./correlate.py \
     --reference-wav-file=linearity-reference.wav \
     --test-wav-file=linearity-filtered.wav \
@@ -191,9 +191,9 @@ sox linearity-test.wav --no-dither linearity-recorded.wav gain -10
 - Use the `plot_amplitude --window-size-seconds` parameter to adjust the
   smoothing of the resulting plot. Higher values make for a more readable plot
   but hides uncertainty in the data points.
-- The amplitude lower bound of the test signal is -130 dBFS in the command
-  above. It is twice the parameter `65`. For example, to test down to -150 dBFS,
-  change `65` to `75`.
+- The amplitude lower bound of the test signal is -120 dBFS in the command
+  above. It is twice the parameter `60`. For example, to test down to -160 dBFS,
+  change `60` to `80`.
 - The purpose of the analysis band-pass filter is to fish the test signal out
   of the dithering noise, as well as any additional noise produced by the EUT.
   The filter parameters determine the lower amplitude bound at which the
@@ -202,8 +202,8 @@ sox linearity-test.wav --no-dither linearity-recorded.wav gain -10
   "hockey stick" on the left of the resulting plot. The above command is able to
   resolve down to around 15 dB below a TPDF dither noise floor; so, for example,
   it can measure down to around -110 dBFS (~18 bits) in the presence of 16-bit
-  dithering noise. The absolute limit of the analyser is around -150 dBFS,
-  presumably due to floating-point precision errors in the sinc filter.
+  dithering noise. The absolute limit of the analyser is around -160 dBFS,
+  presumably due to computation accuracy.
 
 [AES17-2015]: http://www.aes.org/publications/standards/search.cfm?docID=21
 [dbFS]: https://en.wikipedia.org/wiki/DBFS#RMS_levels
