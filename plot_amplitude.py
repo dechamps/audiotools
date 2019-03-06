@@ -53,7 +53,9 @@ def plot(x, y, **kwargs):
 	else:
 		axes.plot(x, y, **kwargs)
 
-if args.reference_wav_file is not None:
+if args.reference_wav_file is None:
+	plot(xaxis, samples_rms_db)
+else:
 	reference_sample_rate_hz, reference_samples = wavfile.read(args.reference_wav_file)
 	if reference_samples.ndim != 1:
 		raise RuntimeError('reference file must only have 1 channel')
@@ -75,7 +77,5 @@ if args.reference_wav_file is not None:
 		plot(xaxis, reference_sample_rms_db, label='Reference')
 		plot(xaxis, samples_rms_db, label='Signal')
 		axes.legend()
-else:
-	plot(xaxis, samples_rms_db)
 
 plt.show()
