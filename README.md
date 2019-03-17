@@ -120,6 +120,65 @@ this measurement will reflect the improved perceived dynamic range thanks to the
 weighting filter. For example, the measured value with SoX `dither -s -p 16` is
 101 dB CCIR-RMS.
 
+## THD+N vs output level measurement
+
+The following procedure is intended to measure THD+N vs output level as defined
+in [AES17-2015][] 6.3.4 and [IEC 61606-3:2008][] 6.2.2.3.
+
+### Assumptions
+
+- The difference between the test signal frequency and the measured signal
+  frequency is negligible.
+  - If it's not, AES17 and IEC 61606-3 diverge, because AES17 specifies a notch
+    filter set to the test signal frequency. In contrast, IEC 61606-3 5.6.3.1
+	specifies an auto-tuning filter.
+- The *upper band-edge frequency* is 20 kHz.
+
+### Test signal
+
+```
+sox --null --bits 16 --rate 48000 thdn-test.wav \
+    synth 10 sine 997 \
+    synth exp amod 0.1 0 0 0 40
+```
+
+### Recorded signal analysis
+
+```
+./correlate.py \
+    --reference-wav-file=thdn-test.wav \
+    --test-wav-file=thdn-recorded.wav \
+    --aligned-wav-file=thdn-aligned.wav
+sox thdn-aligned.wav --bits 32 thdn-filtered.wav \
+    bandreject 997 3.1q bandreject 997 3.1q \
+    remix 1 trim 0.02 -0.02
+sox thdn-test.wav thdn-reference.wav trim 0.02 -0.02
+./plot_amplitude.py \
+    --reference-wav-file=thdn-reference.wav \
+    --wav-file=thdn-filtered.wav \
+    --relative --window-size-seconds=0.1 --against-normalized-amplitude \
+    --x-label 'Normalized signal level (dB)' --y-label 'THD+N (dB)'
+```
+
+The above `plot_amplitude` command shows THD+N, relative to the total level of
+the measured signal. To plot absolute N+D, remove `--relative`.
+
+Note: `trim 0.02 -0.02` removes invalid data at the beginning and end of the
+signal that is caused by filter discontinuities. This invalid data can cause
+spurious outliers at the ends of the plot.
+
+### Example results
+
+Normal result where `thdn-recorded.wav` is a copy of `thdn-test.wav`:
+
+```
+sox thdn-test.wav thdn-recorded.wav
+```
+![Normal THD+N vs level](thdn-normal.png)
+
+Performance in this example is limited by the 16-bit dithering noise floor of
+the test signal.
+
 ## Linearity measurement
 
 This procedure measures the amplitude linearity of the EUT; i.e. its low-level
