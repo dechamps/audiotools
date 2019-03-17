@@ -16,6 +16,8 @@ against_amplitude_group.add_argument('--against-amplitude', help='plot against r
 against_amplitude_group.add_argument('--against-normalized-amplitude', help='plot against normalized reference amplitude (if any), not time', action='store_true')
 argument_parser.add_argument('--center', help='offset the Y axis such that that the median is 0 dB', action='store_true')
 argument_parser.add_argument('--window-size-seconds', help='size of sliding window, in seconds', type=float, default=0.01)
+argument_parser.add_argument('--x-label', help='X axis label')
+argument_parser.add_argument('--y-label', help='Y axis label')
 args = argument_parser.parse_args()
 
 if (args.window_size_seconds <= 0):
@@ -86,5 +88,10 @@ else:
 		plot(xaxis, reference_sample_rms_db, label='Reference')
 		plot(xaxis, samples_rms_db, label='Signal')
 		axes.legend()
+
+if args.x_label is not None:
+	axes.set_xlabel(args.x_label)
+if args.y_label is not None:
+	axes.set_ylabel(args.y_label)
 
 plt.show()
