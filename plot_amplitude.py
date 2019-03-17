@@ -13,7 +13,7 @@ argument_parser.add_argument('--reference-wav-file', help='use a WAV file as a r
 argument_parser.add_argument('--relative', help='plot the error between the signal and the reference (if any)', action='store_true')
 against_amplitude_group = argument_parser.add_mutually_exclusive_group()
 against_amplitude_group.add_argument('--against-amplitude', help='plot against reference amplitude (if any), not time', action='store_true')
-against_amplitude_group.add_argument('--against-normalized-amplitude', help='plot againt normalized reference amplitude (if any), not time', action='store_true')
+against_amplitude_group.add_argument('--against-normalized-amplitude', help='plot against normalized reference amplitude (if any), not time', action='store_true')
 argument_parser.add_argument('--center', help='offset the Y axis such that that the median is 0 dB', action='store_true')
 argument_parser.add_argument('--window-size-seconds', help='size of sliding window, in seconds', type=float, default=0.01)
 args = argument_parser.parse_args()
