@@ -21,24 +21,31 @@ args = argument_parser.parse_args()
 if (args.window_size_seconds <= 0):
 	raise RuntimeError('invalid window size')
 
-sample_rate_hz, samples = wavfile.read(args.wav_file)
+def wavfile_read_normalized(wav_file):
+	sample_rate_hz, samples = wavfile.read(wav_file)
+	if samples.dtype.kind == 'i':
+		factor = np.iinfo(samples.dtype).max
+		samples = samples.astype(float)
+		samples /= factor
+	return sample_rate_hz, samples
+
+sample_rate_hz, samples = wavfile_read_normalized(args.wav_file)
 if samples.ndim != 1:
 	raise RuntimeError('input file must only have 1 channel')
 
 window_size_samples = int(sample_rate_hz * args.window_size_seconds)
 def compute_rms_db(samples):
-	samples = samples.astype(float)
 	samples_squared = np.square(samples)
 	samples_mean_squared = np.fmax(convolve(samples_squared, np.ones(window_size_samples) / window_size_samples, mode='valid'), 1e-35)
 	samples_mean_squared = samples_mean_squared[::window_size_samples]
 	samples_rms = np.sqrt(samples_mean_squared)
-	samples_rms_db = 20 * np.log10(samples_rms)
+	samples_rms_db = 20 * np.log10(samples_rms * np.sqrt(2))  # *sqrt(2) because of dBFS definition
 	return samples_rms_db
 samples_rms_db = compute_rms_db(samples)
 
 figure = plt.figure()
 axes = figure.add_subplot(1, 1, 1)
-axes.set_ylabel('RMS amplitude (dB)')
+axes.set_ylabel('RMS amplitude (dBFS)')
 axes.autoscale(axis='x', tight=True)
 axes.grid()
 
@@ -56,7 +63,7 @@ def plot(x, y, **kwargs):
 if args.reference_wav_file is None:
 	plot(xaxis, samples_rms_db)
 else:
-	reference_sample_rate_hz, reference_samples = wavfile.read(args.reference_wav_file)
+	reference_sample_rate_hz, reference_samples = wavfile_read_normalized(args.reference_wav_file)
 	if reference_samples.ndim != 1:
 		raise RuntimeError('reference file must only have 1 channel')
 	if reference_sample_rate_hz != sample_rate_hz:
@@ -66,7 +73,7 @@ else:
 	reference_sample_rms_db = compute_rms_db(reference_samples)
 	if args.against_amplitude:
 		xaxis = reference_sample_rms_db
-		axes.set_xlabel('Reference amplitude (dB)')
+		axes.set_xlabel('Reference amplitude (dBFS)')
 	if args.against_normalized_amplitude:
 		xaxis = reference_sample_rms_db - np.max(reference_sample_rms_db)
 		axes.set_xlabel('Normalized reference amplitude (dB)')
