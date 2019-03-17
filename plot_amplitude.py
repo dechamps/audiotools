@@ -80,6 +80,8 @@ else:
 	if args.relative:
 		axes.set_ylabel('RMS amplitude error (dB)')
 		plot(xaxis, samples_rms_db - reference_sample_rms_db)
+	elif args.against_amplitude or args.against_normalized_amplitude:
+		plot(xaxis, samples_rms_db)
 	else:
 		plot(xaxis, reference_sample_rms_db, label='Reference')
 		plot(xaxis, samples_rms_db, label='Signal')
