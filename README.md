@@ -139,7 +139,7 @@ in [AES17-2015][] 6.3.4 and [IEC 61606-3:2008][] 6.2.2.3.
 ```
 sox --null --bits 16 --rate 48000 thdn-test.wav \
     synth 10 sine 997 \
-    synth exp amod 0.1 0 0 0 40
+    synth exp amod 0.1 0 0 0 45
 ```
 
 ### Recorded signal analysis
@@ -150,9 +150,10 @@ sox --null --bits 16 --rate 48000 thdn-test.wav \
     --test-wav-file=thdn-recorded.wav \
     --aligned-wav-file=thdn-aligned.wav
 sox thdn-aligned.wav --bits 32 thdn-filtered.wav \
+    highpass 4 highpass 4 \
     bandreject 997 3.1q bandreject 997 3.1q \
-    remix 1 trim 0.02 -0.02
-sox thdn-test.wav thdn-reference.wav trim 0.02 -0.02
+    remix 1 trim 0.5 -0.5
+sox thdn-test.wav thdn-reference.wav highpass 4 highpass 4 trim 0.5 -0.5
 ./plot_amplitude.py \
     --reference-wav-file=thdn-reference.wav \
     --wav-file=thdn-filtered.wav \
@@ -163,7 +164,10 @@ sox thdn-test.wav thdn-reference.wav trim 0.02 -0.02
 The above `plot_amplitude` command shows THD+N, relative to the total level of
 the measured signal. To plot absolute N+D, remove `--relative`.
 
-Note: `trim 0.02 -0.02` removes invalid data at the beginning and end of the
+Note: the purpose of the highpass filter is to remove any DC offset, which can
+wreak havoc in this measurement.
+
+Note: `trim 0.5 -0.5` removes invalid data at the beginning and end of the
 signal that is caused by filter discontinuities. This invalid data can cause
 spurious outliers at the ends of the plot.
 
