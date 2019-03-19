@@ -209,15 +209,15 @@ sox --null --bits 16 --rate 48000 linearity-test.wav \
 ### Recorded signal analysis
 
 ```
-sox linearity-test.wav --bits 32 linearity-reference.wav bandpass 997 200q bandpass 997 200q remix 1
-sox linearity-recorded.wav --bits 32 linearity-filtered.wav bandpass 997 200q bandpass 997 200q remix 1
 ./correlate.py \
-    --reference-wav-file=linearity-reference.wav \
-    --test-wav-file=linearity-filtered.wav \
+    --reference-wav-file=linearity-test.wav \
+    --test-wav-file=linearity-recorded.wav \
     --aligned-wav-file=linearity-aligned.wav
+sox linearity-test.wav --bits 32 linearity-reference.wav bandpass 997 200q bandpass 997 200q remix 1
+sox linearity-aligned.wav --bits 32 linearity-filtered.wav bandpass 997 200q bandpass 997 200q remix 1
 ./plot_amplitude.py \
     --reference-wav-file=linearity-reference.wav \
-    --wav-file=linearity-aligned.wav \
+    --wav-file=linearity-filtered.wav \
     --against-normalized-amplitude --relative --center --window-size-seconds=1
 ```
 
