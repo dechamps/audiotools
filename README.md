@@ -162,7 +162,7 @@ sox thdn-test.wav thdn-reference.wav highpass 4 highpass 4 trim 1 -1
     --reference-wav-file=thdn-reference.wav \
     --wav-file=thdn-filtered.wav \
     --relative --window-size-seconds=0.4 --against-normalized-amplitude \
-    --x-label 'Normalized signal level (dB)' --y-label 'THD+N (dB)'
+    --x-label 'Normalized signal level (dB)' --y-label 'THD+N ratio (dB)'
 ```
 
 The above `plot_amplitude` command shows THD+N, relative to the total level of
