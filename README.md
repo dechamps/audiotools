@@ -77,7 +77,7 @@ The following procedure is intended to measure dynamic range as defined in
 ### Test signal
 
 ```
-sox --null --bits 16 --rate 48000 997-60-16-48000.wav synth 30 sine 997 gain -60
+sox --null --bits 16 --rate 48000 997-60-16-48000.wav synth 10 sine 997 gain -60
 ```
 
 ### Measurement filter
