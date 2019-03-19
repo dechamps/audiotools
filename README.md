@@ -93,6 +93,7 @@ The following command implements all of the above:
 ```
 sox ... --null \
 	rate -v 48000 \
+	highpass 4 highpass 4 \
 	bandreject 997 2q \
 	$(./generate_fir_filter.py \
 		--frequency-response-spec-file=./bs468.txt \
@@ -100,6 +101,9 @@ sox ... --null \
 		--sample-rate-hz=48000 --taps=63 --print-sox-fir) gain -5.6 \
 	trim 1 -1 stats
 ```
+
+Note: the purpose of the highpass filter is to remove any DC offset, which can
+wreak havoc in this measurement.
 
 Note: `trim 1 -1` removes invalid data at the beginning and end of the signal
 that is caused by filter discontinuities. This invalid data can throw off the
