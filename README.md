@@ -267,10 +267,10 @@ sox linearity-test.wav --no-dither linearity-recorded.wav gain -10
   analyser itself "bottoms out" (i.e. becomes unable to distinguish the test
   signal from the surrounding noise). That limit appears as a vertical
   "hockey stick" on the left of the resulting plot. The above command is able to
-  resolve down to around 15 dB below a TPDF dither noise floor; so, for example,
-  it can measure down to around -110 dBFS (~18 bits) in the presence of 16-bit
-  dithering noise. The absolute limit of the analyser is around -160 dBFS,
-  presumably due to computation accuracy.
+  resolve down to around 15 dB below a TPDF dither noise floor with around 0.5
+  dB accuracy; so, for example, it can measure down to around -110 dBFS
+  (~18 bits) in the presence of 16-bit dithering noise. The absolute limit of
+  the analyser is around -160 dBFS, presumably due to computation accuracy.
 
 [AES17-2015]: http://www.aes.org/publications/standards/search.cfm?docID=21
 [dbFS]: https://en.wikipedia.org/wiki/DBFS#RMS_levels
