@@ -142,8 +142,8 @@ in [AES17-2015][] 6.3.4 and [IEC 61606-3:2008][] 6.2.2.3.
 
 ```
 sox --null --bits 16 --rate 48000 thdn-test.wav \
-    synth 10 sine 997 \
-    synth exp amod 0.1 0 0 0 45
+    synth 40 sine 997 \
+    synth exp amod 0.025 0 0 0 45
 ```
 
 ### Recorded signal analysis
@@ -155,13 +155,13 @@ sox --null --bits 16 --rate 48000 thdn-test.wav \
     --aligned-wav-file=thdn-aligned.wav
 sox thdn-aligned.wav --bits 32 thdn-filtered.wav \
     highpass 4 highpass 4 \
-    bandreject 997 3.1q bandreject 997 3.1q \
-    remix 1 trim 0.5 -0.5
-sox thdn-test.wav thdn-reference.wav highpass 4 highpass 4 trim 0.5 -0.5
+    bandreject 997 4.3q bandreject 997 4.3q bandreject 997 4.3q \
+    remix 1 trim 1 -1
+sox thdn-test.wav thdn-reference.wav highpass 4 highpass 4 trim 1 -1
 ./plot_amplitude.py \
     --reference-wav-file=thdn-reference.wav \
     --wav-file=thdn-filtered.wav \
-    --relative --window-size-seconds=0.1 --against-normalized-amplitude \
+    --relative --window-size-seconds=0.4 --against-normalized-amplitude \
     --x-label 'Normalized signal level (dB)' --y-label 'THD+N (dB)'
 ```
 
@@ -171,7 +171,7 @@ the measured signal. To plot absolute N+D, remove `--relative`.
 Note: the purpose of the highpass filter is to remove any DC offset, which can
 wreak havoc in this measurement.
 
-Note: `trim 0.5 -0.5` removes invalid data at the beginning and end of the
+Note: `trim 1 -1` removes invalid data at the beginning and end of the
 signal that is caused by filter discontinuities. This invalid data can cause
 spurious outliers at the ends of the plot.
 
