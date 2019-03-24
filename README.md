@@ -157,7 +157,7 @@ sox thdn-aligned.wav --bits 32 thdn-filtered.wav \
     highpass 4 highpass 4 \
     bandreject 997 4.3q bandreject 997 4.3q bandreject 997 4.3q \
     remix 1 trim 1 -1
-sox thdn-test.wav thdn-reference.wav highpass 4 highpass 4 trim 1 -1
+sox thdn-aligned.wav thdn-reference.wav trim 1 -1
 ./plot_amplitude.py \
     --reference-wav-file=thdn-reference.wav \
     --wav-file=thdn-filtered.wav \
